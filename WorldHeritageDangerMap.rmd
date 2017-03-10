@@ -1,0 +1,13 @@
+---
+title: "World Heritage in Danger Map"
+author: "jpapmeier"
+output:
+  ioslides_presentation:
+  beamer_presentation: default
+always_allow_html: yes
+---
+
+```{r}
+
+```
+
