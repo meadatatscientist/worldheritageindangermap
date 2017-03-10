@@ -1,13 +1,54 @@
 ---
 title: "World Heritage in Danger Map"
-author: "jpapmeier"
-output:
-  ioslides_presentation:
-  beamer_presentation: default
-always_allow_html: yes
+author: jpapmeier
+output: html_document
 ---
 
-```{r}
+```{r, setup, warning=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(curl)
+library(leaflet)
+library(xml2)
+library(tidyr)
+
+timestamp <- Sys.time()
+```
+
+This is a map of the UN World Heritage Sites in danger according to [Wikipedia](https://en.wikipedia.org/wiki/List_of_World_Heritage_in_Danger)
+
+The map was generated with the data from `r format(timestamp)` 
+
+```{r, get_data}
+
+# URL to the data
+url <- "https://tools.wmflabs.org/kmlexport?article=List_of_World_Heritage_in_Danger&section=Currently+listed+sites"
+
+
+kml <- read_xml(url)
+```
+
+
+```{r, clean_data}
+places <- xml_find_all(xml_ns_strip(kml),"//Placemark")
+
+names <- xml_text(xml_find_all(places,".//name"))
+coordinates <- xml_text(xml_find_all(places,".//coordinates"))
+
+df_places <- data.frame(names, coordinates)
+df_places <- separate(df_places,coordinates,c("lng","lat","alt"),sep=",")
+
+df_places$lat <- as.double(df_places$lat)
+df_places$lng <- as.double(df_places$lng)
 
 ```
+
+
+```{r, map}
+m <- leaflet() %>%
+  addTiles() %>% 
+  addMarkers(lng=df_places$lng, lat=df_places$lat, popup=df_places$name)
+m
+```
+
 
